@@ -86,19 +86,19 @@ export class SiteParser {
 			.match(/состоянию на (.+)$/i)
 
 		if (!match) {
-			throw new Error()
+			throw new Error('Не удалось получить дату')
 		}
 
 		const [, dateStr] = match
 		const date = parseDate(dateStr, 'dd MMMM HH:mm', new Date(), { locale: ru })
 
 		if (!isValid(date)) {
-			throw new Error()
+			throw new Error('Не удалось распарсить дату')
 		}
 
 		const spreadStr = $('cv-spread-overview').attr(':spread-data')
 		if (!spreadStr) {
-			throw new Error()
+			throw new Error('Не удалось получить статистику из HTML')
 		}
 
 		const spreadData = JSON.parse(spreadStr)
