@@ -21,6 +21,10 @@ export async function addStatsToTable(csvPath: string, stats: Stat[]): Promise<v
 		isAfter(parseDate(stat.date, 'dd.MM.yyyy', new Date()), lastDate),
 	)
 
+	if (newStats.length === 0) {
+		return
+	}
+
 	const statByDate = groupBy(newStats, (stat) => stat.date)
 
 	const newCsvData = sortBy(Object.entries(statByDate), ([date]) =>
