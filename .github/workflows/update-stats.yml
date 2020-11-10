@@ -1,5 +1,7 @@
 name: Update Stats
+
 on:
+  workflow_dispatch:
   schedule:
     # At minute 0 past every 6th hour from 0 through 23.
     - cron: '0 0/6 * * *'
