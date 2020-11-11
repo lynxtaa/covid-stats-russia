@@ -3,7 +3,7 @@ import { URLSearchParams } from 'url'
 import fetch from 'node-fetch'
 import { assert } from 'superstruct'
 import cheerio from 'cheerio'
-import { parse as parseDate, isValid, format as formatDate } from 'date-fns'
+import { parse as parseDate, isValid, startOfDay } from 'date-fns'
 import { ru } from 'date-fns/locale'
 
 import { RegionCode, regions } from './regions'
@@ -16,12 +16,11 @@ export enum Category {
 }
 
 export type Stat = {
-	date: string
+	date: Date
 	sick: number
 	healed: number
 	died: number
-	region: string
-	name: string
+	regionCode: string
 }
 
 export class SiteParser {
@@ -49,22 +48,21 @@ export class SiteParser {
 			assert(data, MonthStats)
 
 			return data.map((el) => ({
-				date: el.date,
+				date: parseDate(el.date, 'dd.MM.yyyy', new Date()),
 				[Category.Sick]: Number(el.sick),
 				[Category.Healed]: Number(el.healed),
 				[Category.Died]: Number(el.died),
-				region: regionCode,
-				name: regions[regionCode],
+				regionCode,
 			}))
 		})
 	}
 
 	async getAllStatsByMonth(): Promise<Stat[]> {
-		const allStats: Stat[] = []
+		let allStats: Stat[] = []
 
-		for (const [region, name] of Object.entries(regions)) {
-			const stats = await this.getStatsByRegion(region as RegionCode)
-			allStats.push(...stats.map((stat) => ({ ...stat, name, region })))
+		for (const regionCode of Object.keys(regions)) {
+			const stats = await this.getStatsByRegion(regionCode as RegionCode)
+			allStats = [...allStats, ...stats.map((stat) => ({ ...stat, regionCode }))]
 		}
 
 		return allStats
@@ -90,7 +88,9 @@ export class SiteParser {
 		}
 
 		const [, dateStr] = match
-		const date = parseDate(dateStr, 'dd MMMM HH:mm', new Date(), { locale: ru })
+		const date = startOfDay(
+			parseDate(dateStr, 'dd MMMM HH:mm', new Date(), { locale: ru }),
+		)
 
 		if (!isValid(date)) {
 			throw new Error('Не удалось распарсить дату')
@@ -105,15 +105,12 @@ export class SiteParser {
 
 		assert(spreadData, DayStats)
 
-		return spreadData.map((item) => {
-			return {
-				date: formatDate(date, 'dd.MM.yyyy'),
-				name: regions[item.code as RegionCode],
-				region: item.code,
-				sick: item.sick,
-				healed: item.healed,
-				died: item.died,
-			}
-		})
+		return spreadData.map((item) => ({
+			date,
+			regionCode: item.code,
+			sick: item.sick,
+			healed: item.healed,
+			died: item.died,
+		}))
 	}
 }

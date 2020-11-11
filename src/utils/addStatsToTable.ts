@@ -1,9 +1,15 @@
 import { promises } from 'fs'
 import { parse as parseCsv, unparse as unparseCsv } from 'papaparse'
-import { parse as parseDate, isAfter } from 'date-fns'
+import { isAfter, formatISO, parseISO, getUnixTime } from 'date-fns'
+import { groupBy, sortBy } from 'lodash'
 
 import { Category, Stat } from '../SiteParser'
-import { groupBy, sortBy } from 'lodash'
+import { regions, RegionCode } from '../regions'
+
+async function appendCsv({ data, csvPath }: { data: string[][]; csvPath: string }) {
+	const newCsv = unparseCsv(data, { header: false, newline: '\n' })
+	await promises.appendFile(csvPath, `${newCsv}\n`, 'utf-8')
+}
 
 export async function addStatsToTable(
 	csvPath: string,
@@ -17,35 +23,54 @@ export async function addStatsToTable(
 		throw new Error(errors[0].message)
 	}
 
-	const lastRow = data[data.length - 1]
-	const lastDate = parseDate(lastRow[0], 'dd.MM.yyyy', new Date())
-
-	const newStats = stats.filter((stat) =>
-		isAfter(parseDate(stat.date, 'dd.MM.yyyy', new Date()), lastDate),
+	const headerIndexes = Object.fromEntries(
+		data[0].map((headerName, i) => [headerName, i]),
 	)
+
+	const lastDate = (() => {
+		const lastRow = data[data.length - 1]
+		return parseISO(lastRow[0])
+	})()
+
+	const newStats = stats.filter((stat) => isAfter(stat.date, lastDate))
 
 	if (newStats.length === 0) {
 		return { statsAdded: 0 }
 	}
 
-	const statByDate = groupBy(newStats, (stat) => stat.date)
-
-	const newCsvData = sortBy(Object.entries(statByDate), ([date]) =>
-		parseDate(date, 'dd.MM.yyyy', new Date()).valueOf(),
-	).flatMap(([date, stats]) =>
-		Object.values(Category).map((category) => ({
-			date,
-			category,
-			Россия: stats.reduce((prev, curr) => prev + curr[category], 0),
-			...Object.fromEntries(
-				sortBy(stats, (stat) => stat.name).map((stat) => [stat.name, stat[category]]),
-			),
-		})),
+	const statByDate = groupBy(newStats, (stat) =>
+		formatISO(stat.date, { representation: 'date' }),
 	)
 
-	const newCsv = unparseCsv(newCsvData, { header: false, newline: '\n' })
+	const newCsvData: string[][] = sortBy(Object.entries(statByDate), ([date]) =>
+		getUnixTime(parseISO(date)),
+	).flatMap(([date, stats]) =>
+		Object.values(Category).map((category) => {
+			const columns: [string, string][] = [
+				['date', date],
+				['category', category],
+				['Россия', String(stats.reduce((prev, curr) => prev + curr[category], 0))],
+				...stats.map((stat): [string, string] => [
+					regions[stat.regionCode as RegionCode],
+					String(stat[category]),
+				]),
+			]
 
-	await promises.appendFile(csvPath, `${newCsv}\n`, 'utf-8')
+			const row: string[] = []
+
+			for (const [colName, colValue] of columns) {
+				if (colName in headerIndexes) {
+					row[headerIndexes[colName]] = colValue
+				} else {
+					throw new Error(`Не найдена колонка для ${colName}`)
+				}
+			}
+
+			return row
+		}),
+	)
+
+	await appendCsv({ data: newCsvData, csvPath })
 
 	return { statsAdded: newCsvData.length }
 }
