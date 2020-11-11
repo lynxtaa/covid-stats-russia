@@ -5,7 +5,10 @@ import { parse as parseDate, isAfter } from 'date-fns'
 import { Category, Stat } from '../SiteParser'
 import { groupBy, sortBy } from 'lodash'
 
-export async function addStatsToTable(csvPath: string, stats: Stat[]): Promise<void> {
+export async function addStatsToTable(
+	csvPath: string,
+	stats: Stat[],
+): Promise<{ statsAdded: number }> {
 	const csv = await promises.readFile(csvPath, 'utf-8')
 
 	const { data, errors } = parseCsv<string[]>(csv, { skipEmptyLines: true })
@@ -22,7 +25,7 @@ export async function addStatsToTable(csvPath: string, stats: Stat[]): Promise<v
 	)
 
 	if (newStats.length === 0) {
-		return
+		return { statsAdded: 0 }
 	}
 
 	const statByDate = groupBy(newStats, (stat) => stat.date)
@@ -43,4 +46,6 @@ export async function addStatsToTable(csvPath: string, stats: Stat[]): Promise<v
 	const newCsv = unparseCsv(newCsvData, { header: false, newline: '\n' })
 
 	await promises.appendFile(csvPath, `${newCsv}\n`, 'utf-8')
+
+	return { statsAdded: newCsvData.length }
 }

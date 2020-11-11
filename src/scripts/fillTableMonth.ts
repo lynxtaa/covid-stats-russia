@@ -6,7 +6,10 @@ async function main() {
 	const siteParser = new SiteParser()
 	const statsByMonth = await siteParser.getAllStatsByMonth()
 
-	await addStatsToTable(getCsvPath(), statsByMonth)
+	const { statsAdded } = await addStatsToTable(getCsvPath(), statsByMonth)
+
+	// eslint-disable-next-line no-console
+	console.log(statsAdded > 0 ? `Added ${statsAdded} stats` : 'No new stats found')
 }
 
 main().catch((err) => {

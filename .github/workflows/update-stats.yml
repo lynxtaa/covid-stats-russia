@@ -3,8 +3,8 @@ name: Update Stats
 on:
   workflow_dispatch:
   schedule:
-    # At minute 0 past every 6th hour from 0 through 23.
-    - cron: '0 0/6 * * *'
+    # At minute 0 past every 6th hour from 3 through 23 (UTC+0)
+    - cron: '0 3/6 * * *'
 
 jobs:
   stale:
