@@ -81,6 +81,7 @@ export class SiteParser {
 
 		const match = $('h1.cv-section__title')
 			.text()
+			.trim()
 			.match(/состоянию на (.+)$/i)
 
 		if (!match) {
