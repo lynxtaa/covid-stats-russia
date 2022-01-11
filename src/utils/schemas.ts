@@ -1,6 +1,6 @@
 import { z } from 'zod'
 
-import { regions } from '../regions'
+import { regions } from '../regions.js'
 
 export const MonthStats = z.array(
 	z.object({

@@ -17,9 +17,20 @@
 		"no-console": "warn",
 		"@typescript-eslint/no-explicit-any": "off",
 		"@typescript-eslint/prefer-optional-chain": "warn",
+		"@typescript-eslint/no-non-null-assertion": "off",
 		"@typescript-eslint/explicit-module-boundary-types": [
 			"warn",
 			{ "allowArgumentsExplicitlyTypedAsAny": true }
+		],
+		"import/extensions": ["error", "ignorePackages"],
+		"import/no-unresolved": "off",
+		"no-restricted-globals": [
+			"error",
+			"require",
+			"module",
+			"exports",
+			"__dirname",
+			"__filename"
 		]
 	}
 }

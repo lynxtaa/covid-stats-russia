@@ -4,6 +4,7 @@
   "description": "Covid-19 Stats in Russia",
   "main": "dist/index.js",
   "prettier": "@lynxtaa/prettier-config",
+  "type": "module",
   "simple-git-hooks": {
     "pre-commit": "npx pretty-quick --staged"
   },
@@ -13,8 +14,8 @@
   "license": "MIT",
   "scripts": {
     "build": "tsc",
-    "update-stats-day": "ts-node src/scripts/fillTableLatestDay.ts",
-    "update-stats-month": "ts-node src/scripts/fillTableMonth.ts",
+    "update-stats-day": "node --loader ts-node/esm src/scripts/fillTableLatestDay.ts",
+    "update-stats-month": "node --loader ts-node/esm src/scripts/fillTableMonth.ts",
     "lint": "eslint --ext .js,.ts src",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
@@ -22,8 +23,8 @@
     "cheerio": "^1.0.0-rc.10",
     "date-fns": "^2.28.0",
     "lodash": "^4.17.21",
-    "node-fetch": "^2.6.6",
-    "p-queue": "^6.6.2",
+    "node-fetch": "^3.1.0",
+    "p-queue": "^7.1.0",
     "papaparse": "^5.3.1",
     "zod": "^3.11.6"
   },
@@ -32,7 +33,6 @@
     "@types/cheerio": "^0.22.30",
     "@types/lodash": "^4.14.178",
     "@types/node": "^16.11.19",
-    "@types/node-fetch": "^2.5.12",
     "@types/papaparse": "^5.3.1",
     "@typescript-eslint/eslint-plugin": "^5.9.1",
     "@typescript-eslint/parser": "^5.9.1",

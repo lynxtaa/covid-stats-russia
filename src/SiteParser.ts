@@ -3,10 +3,10 @@ import { URLSearchParams } from 'url'
 import fetch from 'node-fetch'
 import cheerio from 'cheerio'
 import { parse as parseDate, isValid, startOfDay } from 'date-fns'
-import { ru } from 'date-fns/locale'
+import ru from 'date-fns/locale/ru/index.js'
 
-import { RegionCode, regions } from './regions'
-import { DayStats, MonthStats } from './utils/schemas'
+import { RegionCode, regions } from './regions.js'
+import { DayStats, MonthStats } from './utils/schemas.js'
 
 export enum Category {
 	Sick = 'sick',
@@ -85,7 +85,7 @@ export class SiteParser {
 			throw new Error('Не удалось получить дату')
 		}
 
-		const [, dateStr] = match
+		const dateStr = match[1]!
 		const date = startOfDay(
 			parseDate(dateStr, 'dd MMMM HH:mm', new Date(), { locale: ru }),
 		)

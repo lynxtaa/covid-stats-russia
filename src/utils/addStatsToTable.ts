@@ -1,13 +1,14 @@
 import { promises } from 'fs'
-import { parse as parseCsv, unparse as unparseCsv } from 'papaparse'
+import papaparse from 'papaparse'
 import { isAfter, formatISO, parseISO, getUnixTime } from 'date-fns'
-import { groupBy, sortBy } from 'lodash'
+import groupBy from 'lodash/groupBy.js'
+import sortBy from 'lodash/sortBy.js'
 
-import { Category, Stat } from '../SiteParser'
-import { regions, RegionCode } from '../regions'
+import { Category, Stat } from '../SiteParser.js'
+import { regions, RegionCode } from '../regions.js'
 
 async function appendCsv({ data, csvPath }: { data: string[][]; csvPath: string }) {
-	const newCsv = unparseCsv(data, { header: false, newline: '\n' })
+	const newCsv = papaparse.unparse(data, { header: false, newline: '\n' })
 	await promises.appendFile(csvPath, `${newCsv}\n`, 'utf-8')
 }
 
@@ -17,19 +18,19 @@ export async function addStatsToTable(
 ): Promise<{ statsAdded: number }> {
 	const csv = await promises.readFile(csvPath, 'utf-8')
 
-	const { data, errors } = parseCsv<string[]>(csv, { skipEmptyLines: true })
+	const { data, errors } = papaparse.parse<string[]>(csv, { skipEmptyLines: true })
 
 	if (errors.length > 0) {
-		throw new Error(errors[0].message)
+		throw new Error(errors[0]!.message)
 	}
 
 	const headerIndexes = Object.fromEntries(
-		data[0].map((headerName, i) => [headerName, i]),
+		data[0]!.map((headerName, i) => [headerName, i]),
 	)
 
 	const lastDate = (() => {
 		const lastRow = data[data.length - 1]
-		return parseISO(lastRow[0])
+		return parseISO(lastRow![0]!)
 	})()
 
 	const newStats = stats.filter(stat => isAfter(stat.date, lastDate))
@@ -60,7 +61,7 @@ export async function addStatsToTable(
 
 			for (const [colName, colValue] of columns) {
 				if (colName in headerIndexes) {
-					row[headerIndexes[colName]] = colValue
+					row[headerIndexes[colName]!] = colValue
 				} else {
 					throw new Error(`Не найдена колонка для ${colName}`)
 				}
