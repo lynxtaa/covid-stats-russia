@@ -12,7 +12,7 @@ async function main() {
 	console.log(statsAdded > 0 ? `Added ${statsAdded} stats` : 'No new stats found')
 }
 
-main().catch((err) => {
+main().catch(err => {
 	// eslint-disable-next-line no-console
 	console.error(err)
 	process.exit(1)

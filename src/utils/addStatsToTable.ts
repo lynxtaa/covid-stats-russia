@@ -32,20 +32,20 @@ export async function addStatsToTable(
 		return parseISO(lastRow[0])
 	})()
 
-	const newStats = stats.filter((stat) => isAfter(stat.date, lastDate))
+	const newStats = stats.filter(stat => isAfter(stat.date, lastDate))
 
 	if (newStats.length === 0) {
 		return { statsAdded: 0 }
 	}
 
-	const statByDate = groupBy(newStats, (stat) =>
+	const statByDate = groupBy(newStats, stat =>
 		formatISO(stat.date, { representation: 'date' }),
 	)
 
 	const newCsvData: string[][] = sortBy(Object.entries(statByDate), ([date]) =>
 		getUnixTime(parseISO(date)),
 	).flatMap(([date, stats]) =>
-		Object.values(Category).map((category) => {
+		Object.values(Category).map(category => {
 			const columns: [string, string][] = [
 				['date', date],
 				['category', category],

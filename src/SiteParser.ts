@@ -1,13 +1,12 @@
 import PQueue from 'p-queue'
 import { URLSearchParams } from 'url'
 import fetch from 'node-fetch'
-import { assert } from 'superstruct'
 import cheerio from 'cheerio'
 import { parse as parseDate, isValid, startOfDay } from 'date-fns'
 import { ru } from 'date-fns/locale'
 
 import { RegionCode, regions } from './regions'
-import { DayStats, MonthStats } from './utils/structs'
+import { DayStats, MonthStats } from './utils/schemas'
 
 export enum Category {
 	Sick = 'sick',
@@ -43,11 +42,9 @@ export class SiteParser {
 				throw new Error(`Error requesting ${response.url}: ${response.status}`)
 			}
 
-			const data = await response.json()
+			const data = MonthStats.parse(await response.json())
 
-			assert(data, MonthStats)
-
-			return data.map((el) => ({
+			return data.map(el => ({
 				date: parseDate(el.date, 'dd.MM.yyyy', new Date()),
 				[Category.Sick]: Number(el.sick),
 				[Category.Healed]: Number(el.healed),
@@ -62,7 +59,7 @@ export class SiteParser {
 
 		for (const regionCode of Object.keys(regions)) {
 			const stats = await this.getStatsByRegion(regionCode as RegionCode)
-			allStats = [...allStats, ...stats.map((stat) => ({ ...stat, regionCode }))]
+			allStats = [...allStats, ...stats.map(stat => ({ ...stat, regionCode }))]
 		}
 
 		return allStats
@@ -102,11 +99,9 @@ export class SiteParser {
 			throw new Error('Не удалось получить статистику из HTML')
 		}
 
-		const spreadData = JSON.parse(spreadStr)
+		const spreadData = DayStats.parse(JSON.parse(spreadStr))
 
-		assert(spreadData, DayStats)
-
-		return spreadData.map((item) => ({
+		return spreadData.map(item => ({
 			date,
 			regionCode: item.code,
 			sick: item.sick,
