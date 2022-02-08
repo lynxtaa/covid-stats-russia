@@ -32,7 +32,7 @@ export class SiteParser {
 	async getStatsByRegion(regionCode: RegionCode): Promise<Stat[]> {
 		return this.queue.add(async () => {
 			const response = await fetch(
-				`https://стопкоронавирус.рф/covid_data.json?${new URLSearchParams({
+				`http://стопкоронавирус.рф/covid_data.json?${new URLSearchParams({
 					do: 'region_stats',
 					code: regionCode,
 				})}`,
@@ -66,7 +66,7 @@ export class SiteParser {
 	}
 
 	async getLatestStats(): Promise<Stat[]> {
-		const response = await fetch(`https://стопкоронавирус.рф/information/`)
+		const response = await fetch(`http://стопкоронавирус.рф/information/`)
 
 		if (!response.ok) {
 			throw new Error(`Error requesting ${response.url}: ${response.status}`)
