@@ -1,4 +1,4 @@
-import cheerio from 'cheerio'
+import * as cheerio from 'cheerio'
 import { parse as parseDate, isValid, startOfDay } from 'date-fns'
 import ru from 'date-fns/locale/ru/index.js'
 import fetch from 'node-fetch'
