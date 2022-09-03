@@ -29,7 +29,7 @@
     "zod": "^3.18.0"
   },
   "devDependencies": {
-    "@lynxtaa/eslint-config": "^0.1.5",
+    "@lynxtaa/eslint-config": "^0.2.0",
     "@lynxtaa/prettier-config": "^0.1.1",
     "@types/cheerio": "^0.22.31",
     "@types/lodash": "^4.14.184",

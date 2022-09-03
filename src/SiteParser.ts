@@ -34,7 +34,7 @@ export class SiteParser {
 				`http://стопкоронавирус.рф/covid_data.json?${new URLSearchParams({
 					do: 'region_stats',
 					code: regionCode,
-				})}`,
+				}).toString()}`,
 			)
 
 			if (!response.ok) {
@@ -94,7 +94,7 @@ export class SiteParser {
 		}
 
 		const spreadStr = $('cv-spread-overview').attr(':spread-data')
-		if (!spreadStr) {
+		if (spreadStr === undefined) {
 			throw new Error('Не удалось получить статистику из HTML')
 		}
 
