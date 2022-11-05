@@ -1,8 +1,8 @@
 import * as cheerio from 'cheerio'
 import { parse as parseDate, isValid, startOfDay } from 'date-fns'
 import ru from 'date-fns/locale/ru/index.js'
-import fetch from 'node-fetch'
 import PQueue from 'p-queue'
+import { fetch } from 'undici'
 
 import { RegionCode, regions } from './regions.js'
 import { DayStats, MonthStats } from './utils/schemas.js'

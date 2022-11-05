@@ -1,4 +1,4 @@
-import { appendFile, readFile } from 'fs/promises'
+import { appendFile, readFile } from 'node:fs/promises'
 
 import { isAfter, formatISO, parseISO, getUnixTime } from 'date-fns'
 import groupBy from 'lodash/groupBy.js'
@@ -10,14 +10,14 @@ import { regions, RegionCode } from '../regions.js'
 
 async function appendCsv({ data, csvPath }: { data: string[][]; csvPath: string }) {
 	const newCsv = papaparse.unparse(data, { header: false, newline: '\n' })
-	await appendFile(csvPath, `${newCsv}\n`, 'utf-8')
+	await appendFile(csvPath, `${newCsv}\n`, 'utf8')
 }
 
 export async function addStatsToTable(
 	csvPath: string,
 	stats: Stat[],
 ): Promise<{ statsAdded: number }> {
-	const csv = await readFile(csvPath, 'utf-8')
+	const csv = await readFile(csvPath, 'utf8')
 
 	const { data, errors } = papaparse.parse<string[]>(csv, { skipEmptyLines: true })
 
