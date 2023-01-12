@@ -1,5 +1,12 @@
 import * as cheerio from 'cheerio'
-import { parse as parseDate, isValid, startOfDay } from 'date-fns'
+import {
+	parse as parseDate,
+	format as formatDate,
+	isValid,
+	startOfDay,
+	setYear,
+	getYear,
+} from 'date-fns'
 import ru from 'date-fns/locale/ru/index.js'
 import PQueue from 'p-queue'
 import { fetch } from 'undici'
@@ -85,12 +92,20 @@ export class SiteParser {
 		}
 
 		const dateStr = match[1]!
-		const date = startOfDay(
-			parseDate(dateStr, 'dd MMMM HH:mm', new Date(), { locale: ru }),
-		)
+		let date = startOfDay(parseDate(dateStr, 'dd MMMM HH:mm', new Date(), { locale: ru }))
 
 		if (!isValid(date)) {
 			throw new Error('Не удалось распарсить дату')
+		}
+
+		// If date on the server is 1 Jan and parsed date is still 31 Dec,
+		// we should fix the year of the `date` by using previous year
+		// related to the server
+		if (
+			formatDate(date, 'dd.MM') === '31.12' &&
+			formatDate(new Date(), 'dd.MM') === '01.01'
+		) {
+			date = setYear(date, getYear(new Date()) - 1)
 		}
 
 		const spreadStr = $('cv-spread-overview').attr(':spread-data')
